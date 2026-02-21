@@ -500,6 +500,8 @@ Evicts oldest entry when `spatial-window-history-max' is exceeded."
     ('split-right
      (spatial-window--save-layout 'split-right)
      (select-window win)
+     (let ((ignore-window-parameters t))
+       (delete-other-windows win))
      (let ((new-win (split-window win nil 'right))
            (next-buf (cadr (buffer-list (selected-frame)))))
        (when next-buf
@@ -508,6 +510,8 @@ Evicts oldest entry when `spatial-window-history-max' is exceeded."
     ('split-below
      (spatial-window--save-layout 'split-below)
      (select-window win)
+     (let ((ignore-window-parameters t))
+       (delete-other-windows win))
      (let ((new-win (split-window win nil 'below))
            (next-buf (cadr (buffer-list (selected-frame)))))
        (when next-buf
