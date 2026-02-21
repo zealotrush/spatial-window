@@ -481,6 +481,23 @@ Evicts oldest entry when `spatial-window-history-max' is exceeded."
     (when (spatial-window--state-overlays-visible st)
       (spatial-window--show-overlays (spatial-window--state-highlighted-windows st)))))
 
+(defun spatial-window--split-window (win side)
+  "Focus WIN full-frame, then split along SIDE with next buffer.
+SIDE is passed to `split-window' (e.g. \\='right or \\='below).
+WIN becomes the primary (left/top) pane; the new pane receives the
+next buffer from the frame's buffer list."
+  (select-window win)
+  (let ((ignore-window-parameters t))
+    (delete-other-windows win))
+  ;; After delete-other-windows the window is no longer a side window,
+  ;; but clear the parameter explicitly in case it lingers.
+  (set-window-parameter win 'window-side nil)
+  (let ((new-win (split-window win nil side))
+        (next-buf (cadr (buffer-list (selected-frame)))))
+    (when next-buf
+      (set-window-buffer new-win next-buf)))
+  (message "Split %s" (if (eq side 'right) "side-by-side" "top-bottom")))
+
 (defun spatial-window--complete-single-input (win)
   "Exit selection mode and complete current single-input action on WIN."
   (spatial-window--exit-selection-mode)
@@ -499,24 +516,10 @@ Evicts oldest entry when `spatial-window-history-max' is exceeded."
      (message "Focused window"))
     ('split-right
      (spatial-window--save-layout 'split-right)
-     (select-window win)
-     (let ((ignore-window-parameters t))
-       (delete-other-windows win)
-       (let ((new-win (split-window win nil 'right))
-             (next-buf (cadr (buffer-list (selected-frame)))))
-         (when next-buf
-           (set-window-buffer new-win next-buf))))
-     (message "Split side-by-side"))
+     (spatial-window--split-window win 'right))
     ('split-below
      (spatial-window--save-layout 'split-below)
-     (select-window win)
-     (let ((ignore-window-parameters t))
-       (delete-other-windows win)
-       (let ((new-win (split-window win nil 'below))
-             (next-buf (cadr (buffer-list (selected-frame)))))
-         (when next-buf
-           (set-window-buffer new-win next-buf))))
-     (message "Split top-bottom"))
+     (spatial-window--split-window win 'below))
     (_ (select-window win))))
 
 (defun spatial-window--set-action (action message)
