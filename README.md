@@ -45,12 +45,14 @@ During selection, the current window is highlighted. Uppercase keys switch the a
 | `K` | Kill | Current window pre-selected[^1]; `RET` to delete, or pick another |
 | `S` | Swap | Press a layout key to swap buffers with current window |
 | `F` | Focus | Current window highlighted; `RET` to focus, or select another |
+| `\|` | Split right | Split window side-by-side; new right pane gets next buffer |
+| `-` | Split below | Split window top-bottom; new bottom pane gets next buffer |
 
 `RET` always confirms: in kill/focus it acts on the current selection, otherwise it exits.
 
 ### History Navigation
 
-Actions that modify window layout (kill, swap, focus) automatically save the previous configuration. While
+Actions that modify window layout (kill, swap, focus, split) automatically save the previous configuration. While
 the overlay is showing, use arrow keys to browse history:
 
 | Key | Action |
@@ -66,7 +68,7 @@ History is kept per-tab when `tab-bar-mode` is active, otherwise per-frame. Up t
 `spatial-window-history-max` entries are retained (default 20).
 
 Unlike `winner-mode`, spatial-window does not listen to hooks or track every window change globally. Only
-actions performed through spatial-window (kill, swap, focus) save history, so undo/redo is predictable —
+actions performed through spatial-window (kill, swap, focus, split) save history, so undo/redo is predictable —
 you're reversing your own deliberate actions, not unrelated side effects from other packages or commands.
 
 ### Edge Extension Keys

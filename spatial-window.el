@@ -497,6 +497,22 @@ Evicts oldest entry when `spatial-window-history-max' is exceeded."
      (let ((ignore-window-parameters t))
        (delete-other-windows win))
      (message "Focused window"))
+    ('split-right
+     (spatial-window--save-layout 'split-right)
+     (select-window win)
+     (let ((new-win (split-window win nil 'right))
+           (next-buf (cadr (buffer-list (selected-frame)))))
+       (when next-buf
+         (set-window-buffer new-win next-buf)))
+     (message "Split side-by-side"))
+    ('split-below
+     (spatial-window--save-layout 'split-below)
+     (select-window win)
+     (let ((new-win (split-window win nil 'below))
+           (next-buf (cadr (buffer-list (selected-frame)))))
+       (when next-buf
+         (set-window-buffer new-win next-buf)))
+     (message "Split top-bottom"))
     (_ (select-window win))))
 
 (defun spatial-window--set-action (action message)
@@ -571,6 +587,16 @@ different window, avoiding an extra deselect step."
   "Switch to focus action with current window highlighted."
   (interactive)
   (spatial-window--set-action 'focus "FOCUS: select window, RET to focus current"))
+
+(defun spatial-window--set-action-split-right ()
+  "Switch to split-right action with current window highlighted."
+  (interactive)
+  (spatial-window--set-action 'split-right "SPLIT |: select window to split side-by-side"))
+
+(defun spatial-window--set-action-split-below ()
+  "Switch to split-below action with current window highlighted."
+  (interactive)
+  (spatial-window--set-action 'split-below "SPLIT -: select window to split top-bottom"))
 
 (defun spatial-window--history-refresh ()
   "Recompute assignments and refresh overlays after history navigation.
@@ -657,7 +683,7 @@ While browsing: shows available directions and position."
 
 (defun spatial-window--unified-mode-message ()
   "Return hint message for unified selection mode."
-  (format "Select window or: [K]ill [S]wap [F]ocus [RET]done%s"
+  (format "Select window or: [K]ill [S]wap [F]ocus [|]split-h [-]split-v [RET]done%s"
           (spatial-window--history-message-part)))
 
 (defun spatial-window--make-unified-keymap ()
@@ -669,6 +695,8 @@ While browsing: shows available directions and position."
     (define-key map (kbd "K") #'spatial-window--set-action-kill)
     (define-key map (kbd "S") #'spatial-window--set-action-swap)
     (define-key map (kbd "F") #'spatial-window--set-action-focus)
+    (define-key map (kbd "|") #'spatial-window--set-action-split-right)
+    (define-key map (kbd "-") #'spatial-window--set-action-split-below)
     (define-key map (kbd "<left>") #'spatial-window--history-back)
     (define-key map (kbd "<right>") #'spatial-window--history-forward)
     map))
@@ -687,6 +715,11 @@ where you are.  Uppercase modifiers change the action:
       build a multi-kill set, then RET to delete all.
   S - Swap: swap buffers with current window
   F - Focus: press RET to focus current window, or select another
+  | - Split side-by-side: selected window becomes left pane
+  - - Split top-bottom: selected window becomes top pane
+
+The new pane from a split receives the next buffer from the
+frame's buffer list.
 
 Other keys:
   Left/Right - Browse window configuration history
