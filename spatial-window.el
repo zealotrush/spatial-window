@@ -501,21 +501,21 @@ Evicts oldest entry when `spatial-window-history-max' is exceeded."
      (spatial-window--save-layout 'split-right)
      (select-window win)
      (let ((ignore-window-parameters t))
-       (delete-other-windows win))
-     (let ((new-win (split-window win nil 'right))
-           (next-buf (cadr (buffer-list (selected-frame)))))
-       (when next-buf
-         (set-window-buffer new-win next-buf)))
+       (delete-other-windows win)
+       (let ((new-win (split-window win nil 'right))
+             (next-buf (cadr (buffer-list (selected-frame)))))
+         (when next-buf
+           (set-window-buffer new-win next-buf))))
      (message "Split side-by-side"))
     ('split-below
      (spatial-window--save-layout 'split-below)
      (select-window win)
      (let ((ignore-window-parameters t))
-       (delete-other-windows win))
-     (let ((new-win (split-window win nil 'below))
-           (next-buf (cadr (buffer-list (selected-frame)))))
-       (when next-buf
-         (set-window-buffer new-win next-buf)))
+       (delete-other-windows win)
+       (let ((new-win (split-window win nil 'below))
+             (next-buf (cadr (buffer-list (selected-frame)))))
+         (when next-buf
+           (set-window-buffer new-win next-buf))))
      (message "Split top-bottom"))
     (_ (select-window win))))
 
