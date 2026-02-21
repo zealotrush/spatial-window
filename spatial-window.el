@@ -493,7 +493,7 @@ next buffer from the frame's buffer list."
   ;; but clear the parameter explicitly in case it lingers.
   (set-window-parameter win 'window-side nil)
   (let ((new-win (split-window win nil side))
-        (next-buf (cadr (buffer-list (selected-frame)))))
+        (next-buf (cl-find-if-not #'minibufferp (cdr (buffer-list (selected-frame))))))
     (when next-buf
       (set-window-buffer new-win next-buf)))
   (message "Split %s" (if (eq side 'right) "side-by-side" "top-bottom")))
