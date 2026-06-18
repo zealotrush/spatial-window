@@ -1,10 +1,11 @@
 ;;; spatial-window.el --- Jump to windows using keyboard spatial mapping -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2025 Le Wang
+;; Copyright (C) 2025-2026 Le Wang, Wang Bei
 
 ;; Author: Le Wang <lewang.dev.26@gmail.com>
-;; URL: https://github.com/lewang/spatial-window
-;; Version: 0.9.3
+;; Maintainer: Wang Bei <zealotrush@icloud.com>
+;; URL: https://github.com/zealotrush/spatial-window
+;; Version: 0.9.4
 ;; Package-Requires: ((emacs "28.1") (posframe "1.0.0"))
 ;; Keywords: convenience, windows
 

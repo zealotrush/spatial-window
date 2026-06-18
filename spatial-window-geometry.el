@@ -1,10 +1,11 @@
 ;;; spatial-window-geometry.el --- Spatial geometry for spatial-window -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2025 Le Wang
+;; Copyright (C) 2025-2026 Le Wang, Wang Bei
 
 ;; Author: Le Wang <lewang.dev.26@gmail.com>
-;; URL: https://github.com/lewang/spatial-window
-;; Version: 0.9.3
+;; Maintainer: Wang Bei <zealotrush@icloud.com>
+;; URL: https://github.com/zealotrush/spatial-window
+;; Version: 0.9.4
 ;; Keywords: convenience, windows
 
 ;; This file is not part of GNU Emacs.

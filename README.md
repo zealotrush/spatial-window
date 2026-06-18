@@ -12,7 +12,8 @@ Requires Emacs 28.1+ and [posframe](https://github.com/tumashu/posframe).
 
 ```elisp
 (use-package spatial-window
-  :ensure (:host github :repo "lewang/spatial-window")
+  :ensure (spatial-window :type git :host github
+                          :repo "zealotrush/spatial-window")
   :bind ("M-o" . spatial-window-select))
 ```
 
