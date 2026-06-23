@@ -218,7 +218,8 @@ Returns a string showing which keys are assigned, displayed in keyboard layout."
   overlay-timer
   history-cursor
   history-live-config
-  kill-soft-select)
+  kill-soft-select
+  exit-transient-map)
 
 (defvar spatial-window--state (spatial-window--make-state)
   "Active session state for spatial-window.")
@@ -330,7 +331,14 @@ pre-browsing layout onto the history ring so the navigation is undoable."
       (spatial-window--save-layout 'undo live)
       (setf (spatial-window--state-history-live-config st) nil))
     (setf (spatial-window--state-selection-active st) nil)
-    (spatial-window--remove-overlays)))
+    (spatial-window--remove-overlays)
+    ;; Synchronously remove the transient map so the *next* keypress
+    ;; is not looked up in it.  The keep-pred runs in pre-command-hook,
+    ;; which fires after read-key-sequence -- too late to prevent the
+    ;; immediate next key from being captured.
+    (when-let* ((exit-fn (spatial-window--state-exit-transient-map st)))
+      (setf (spatial-window--state-exit-transient-map st) nil)
+      (funcall exit-fn))))
 
 (defun spatial-window--abort ()
   "Abort window selection and clean up overlays."
@@ -409,13 +417,14 @@ MESSAGE is displayed in the minibuffer."
         (spatial-window--show-overlays highlighted)
         (setf (spatial-window--state-overlays-visible st) t))
       (when message (message "%s" message))
-      (set-transient-map
-       keymap
-       (lambda ()
-         (let ((binding (lookup-key keymap (this-command-keys-vector))))
-           (and binding (not (numberp binding))
-                (spatial-window--state-selection-active spatial-window--state))))
-       #'spatial-window--cleanup-mode))))
+      ;; Capture exit function so exit-selection-mode can remove the
+      ;; transient map synchronously, before the next read-key-sequence.
+      (setf (spatial-window--state-exit-transient-map st)
+            (set-transient-map
+             keymap
+             (lambda ()
+               (spatial-window--state-selection-active spatial-window--state))
+             #'spatial-window--cleanup-mode)))))
 
 (defun spatial-window--kill-mode-message ()
   "Display kill mode status message."
@@ -501,12 +510,14 @@ next buffer from the frame's buffer list."
 
 (defun spatial-window--complete-single-input (win)
   "Exit selection mode and complete current single-input action on WIN."
-  (spatial-window--exit-selection-mode)
-  (pcase (spatial-window--state-action spatial-window--state)
+  ;; Snapshot action before exit-selection-mode destroys state.
+  (let ((action (spatial-window--state-action spatial-window--state))
+        (source (spatial-window--state-source-window spatial-window--state)))
+    (spatial-window--exit-selection-mode)
+    (pcase action
     ('swap
      (spatial-window--save-layout 'swap)
-     (spatial-window--swap-windows
-      (spatial-window--state-source-window spatial-window--state) win)
+     (spatial-window--swap-windows source win)
      (select-window win)
      (message "Swapped windows"))
     ('focus
@@ -521,7 +532,7 @@ next buffer from the frame's buffer list."
     ('split-below
      (spatial-window--save-layout 'split-below)
      (spatial-window--split-window win 'below))
-    (_ (select-window win))))
+    (_ (select-window win)))))
 
 (defun spatial-window--set-action (action message)
   "Switch to ACTION mode, highlight current window, show MESSAGE.
